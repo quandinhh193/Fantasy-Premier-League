@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PRANK — Refund Simulator</title>
+<style>
+  :root{--bg:#0f1724;--card:#0b1220;--accent:#0ea5a4;--muted:#9aa6b2;--glass: rgba(255,255,255,0.04);}
+  body{margin:0;background:linear-gradient(180deg,#071023 0%, #072033 100%);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6eef6;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
+  .wrap{width:100%;max-width:760px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:22px;box-shadow:0 12px 40px rgba(2,6,23,.6);border:1px solid rgba(255,255,255,0.03)}
+  header{display:flex;align-items:center;gap:14px}
+  .logo{width:56px;height:56px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:var(--accent);box-shadow:0 4px 18px rgba(14,165,164,0.06)}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:6px 0 16px;color:var(--muted);font-size:13px}
+  form{display:grid;gap:12px;margin-top:6px}
+  label{font-size:13px;color:#cfe7ea}
+  input[type="text"], input[type="email"], textarea{
+    width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;font-size:14px;box-sizing:border-box;
+  }
+  textarea{min-height:100px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#052022;font-weight:700;cursor:pointer}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .prank-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,99,71,0.08);color:#ffb7a0;font-weight:700;font-size:12px;border:1px solid rgba(255,99,71,0.06)}
+  .panel{margin-top:16px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border:1px solid rgba(255,255,255,0.02)}
+  .progress{height:14px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg, #7fffd4, #00c2ff);border-radius:999px;transition:width .4s ease}
+  .status{margin-top:10px;font-size:13px;color:var(--muted)}
+  .final{margin-top:12px;padding:12px;border-radius:8px;background:rgba(14,165,164,0.06);color:#cff8f7;display:none}
+  .branding-hint{font-size:12px;color:var(--muted);margin-top:8px}
+  footer{margin-top:14px;font-size:12px;color:var(--muted)}
+  @media (max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-live="polite">
+    <header>
+      <div class="logo">G</div>
+      <div>
+        <h1>Refund Simulator <span style="margin-left:10px" class="prank-badge">PRANK — NOT REAL</span></h1>
+        <p class="lead">This is a harmless prank simulator. It does not contact any company or process real refunds — everything runs in your browser.</p>
+      </div>
+    </header>
+
+    <form id="simForm" autocomplete="off" onsubmit="return false;">
+      <label for="email">Registered email</label>
+      <input id="email" name="email" type="email" placeholder="friend@example.com" required>
+
+      <div class="row">
+        <div>
+          <label for="manager">Manager's name</label>
+          <input id="manager" name="manager" type="text" placeholder="Manager Name (e.g. Alex Smith)" required>
+        </div>
+        <div>
+          <label for="reason">Reason for refund</label>
+          <input id="reason" name="reason" type="text" placeholder="Accidental purchase / Disappointed with game" required>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;align-items:center">
+        <button class="btn" id="submitBtn">Submit</button>
+        <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+      </div>
+    </form>
+
+    <div class="panel" id="panel" aria-hidden="true" style="display:none">
+      <div class="progress"><i id="bar" style="width:0%"></i></div>
+      <div class="status" id="status">Queued...</div>
+      <div class="final" id="finalBox" role="status"></div>
+    </div>
+
+    <div class="branding-hint">You can change the logo, colors or the final message directly inside the HTML. This file stays local and collects no data.</div>
+
+    <footer>Tip: This is a joke — be kind, and do not impersonate support or try to trick strangers.</footer>
+  </div>
+
+<script>
+(function(){
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const panel = document.getElementById('panel');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+  const finalBox = document.getElementById('finalBox');
+  const form = document.getElementById('simForm');
+
+  const steps = [
+    {text: 'Validating purchase record...', delay: 900},
+    {text: 'Verifying account details...', delay: 1200},
+    {text: 'Contacting payment gateway...', delay: 1300},
+    {text: 'Processing refund...', delay: 1100},
+    {text: 'Finalizing transaction...', delay: 1000},
+  ];
+
+  // safe default final messages (pick one)
+  const finalMessages = [
+    "Prank complete — no real refund occurred. Tell your friend: gotcha! 😄",
+    "Joke revealed: This was only a simulator. No money changed hands. All is forgiven?",
+    "All set — this was a harmless prank page. Consider buying your friend an in-game coffee instead ☕"
+  ];
+
+  function pickFinalMessage() {
+    // choose message at random; you can replace with any safe message
+    return finalMessages[Math.floor(Math.random()*finalMessages.length)];
+  }
+
+  function simulateProgress() {
+    panel.style.display = 'block';
+    panel.setAttribute('aria-hidden','false');
+    finalBox.style.display = 'none';
+    bar.style.width = '0%';
+    status.textContent = 'Starting...';
+
+    let total = 0;
+    const totalSteps = steps.length;
+    let stepIndex = 0;
+
+    function nextStep(){
+      if(stepIndex >= totalSteps) {
+        // finish
+        bar.style.width = '100%';
+        status.textContent = 'Completed';
+        setTimeout(()=> {
+          finalBox.textContent = pickFinalMessage();
+          finalBox.style.display = 'block';
+          // show a small animation
+          finalBox.animate([{opacity:0, transform:'translateY(-6px)'}, {opacity:1, transform:'translateY(0)'}], {duration:350, easing:'ease-out'});
+        }, 500);
+        return;
+      }
+      const s = steps[stepIndex];
+      status.textContent = s.text;
+      // bump progress
+      total += Math.round(100/totalSteps);
+      bar.style.width = Math.min(total, 98) + '%';
+      stepIndex++;
+      setTimeout(nextStep, s.delay + Math.random()*600);
+    }
+
+    // small initial delay for realism
+    setTimeout(nextStep, 400 + Math.random()*400);
+  }
+
+  submitBtn.addEventListener('click', function(){
+    if(!form.reportValidity()) return;
+    // Grey-out submit to look real
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    simulateProgress();
+    // Re-enable after done (safety)
+    setTimeout(()=> {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit';
+    }, 8000);
+  });
+
+  resetBtn.addEventListener('click', function(){
+    form.reset();
+    panel.style.display = 'none';
+    panel.setAttribute('aria-hidden','true');
+    bar.style.width = '0%';
+    finalBox.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>

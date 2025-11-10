@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Refund Request</title>
+<style>
+  :root{--bg:#0f1724;--card:#0b1220;--accent:#0ea5a4;--muted:#9aa6b2;--glass: rgba(255,255,255,0.04);}
+  body{margin:0;background:linear-gradient(180deg,#071023 0%, #072033 100%);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6eef6;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
+  .wrap{width:100%;max-width:760px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:22px;box-shadow:0 12px 40px rgba(2,6,23,.6);border:1px solid rgba(255,255,255,0.03)}
+  header{display:flex;align-items:center;gap:14px}
+  .logo{width:56px;height:56px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:var(--accent);box-shadow:0 4px 18px rgba(14,165,164,0.06)}
+  .logo img{width:48px;height:48px;object-fit:contain;border-radius:6px}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:6px 0 16px;color:var(--muted);font-size:13px}
+  .disclaimer{font-size:12px;color:#ffd9d9;background:rgba(255,13,13,0.06);padding:8px;border-radius:8px;border:1px solid rgba(255,13,13,0.06);margin-top:8px}
+  form{display:grid;gap:12px;margin-top:6px}
+  label{font-size:13px;color:#cfe7ea}
+  input[type="text"], input[type="email"], textarea{
+    width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;font-size:14px;box-sizing:border-box;
+  }
+  textarea{min-height:100px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#052022;font-weight:700;cursor:pointer}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .panel{margin-top:16px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border:1px solid rgba(255,255,255,0.02)}
+  .progress{height:14px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg, #7fffd4, #00c2ff);border-radius:999px;transition:width .4s ease}
+  .status{margin-top:10px;font-size:13px;color:var(--muted)}
+  .final{margin-top:12px;padding:12px;border-radius:8px;background:rgba(14,165,164,0.06);color:#cff8f7;display:none}
+  @media (max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-live="polite">
+    <header>
+      <div class="logo">
+        <!-- Put your own non-official logo file named "logo.png" in the same folder as this HTML.
+             DO NOT use the real Fantasy Premier League logo unless you have permission. -->
+        <img src="logo.png" alt="Game logo (your image)">
+      </div>
+      <div>
+        <h1>Refund Request</h1>
+        <p class="lead">This is the official refund page for Fantasy Premier League. All information you provide will be kept secure and won't be shared with any third-party organizations under any circumstances</p>
+        <div class="disclaimer">Note: Kindly ensure that all provided information is accurate to facilitate an expedited process.</div>
+      </div>
+    </header>
+
+    <form id="simForm" autocomplete="off" onsubmit="return false;">
+      <label for="email">Registered email</label>
+      <input id="email" name="email" type="email" placeholder="friend@example.com" required>
+
+      <div class="row">
+        <div>
+          <label for="manager">Manager's name</label>
+          <input id="manager" name="manager" type="text" placeholder="Manager Name (e.g. Alex Smith)" required>
+        </div>
+        <div>
+          <label for="reason">Reason for refund</label>
+          <input id="reason" name="reason" type="text" placeholder="Accidental purchase / Disappointed with game" required>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;align-items:center">
+        <button class="btn" id="submitBtn">Submit</button>
+        <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+      </div>
+    </form>
+
+    <div class="panel" id="panel" aria-hidden="true" style="display:none">
+      <div class="progress"><i id="bar" style="width:0%"></i></div>
+      <div class="status" id="status">Queued...</div>
+      <div class="final" id="finalBox" role="status"></div>
+    </div>
+
+  </div>
+
+<script>
+(function(){
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const panel = document.getElementById('panel');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+  const finalBox = document.getElementById('finalBox');
+  const form = document.getElementById('simForm');
+
+  const steps = [
+    {text: 'Validating purchase record...', delay: 900},
+    {text: 'Verifying account details...', delay: 1200},
+    {text: 'C

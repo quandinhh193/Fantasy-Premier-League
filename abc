@@ -5,87 +5,182 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Refund Request</title>
 <style>
-  :root{--bg:#0f1724;--card:#0b1220;--accent:#0ea5a4;--muted:#9aa6b2;--glass: rgba(255,255,255,0.04);}
-  body{margin:0;background:linear-gradient(180deg,#071023 0%, #072033 100%);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6eef6;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
-  .wrap{width:100%;max-width:760px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:22px;box-shadow:0 12px 40px rgba(2,6,23,.6);border:1px solid rgba(255,255,255,0.03)}
-  header{display:flex;align-items:center;gap:14px}
-  .logo{width:56px;height:56px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:var(--accent);box-shadow:0 4px 18px rgba(14,165,164,0.06)}
-  .logo img{width:48px;height:48px;object-fit:contain;border-radius:6px}
+  :root{--bg:#071023;--card:#071423;--accent:#00b4d8;--muted:#9aa6b2}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071023 0%, #072033 100%);color:#e6eef6}
+  .container{max-width:760px;margin:40px auto;padding:20px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 40px rgba(2,6,23,.6)}
+  .header{display:flex;gap:14px;align-items:center}
+  .logo-wrap{width:64px;height:64px;flex:0 0 64px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .logo-wrap img{max-width:100%;height:100%;object-fit:contain}
   h1{margin:0;font-size:20px}
-  p.lead{margin:6px 0 16px;color:var(--muted);font-size:13px}
-  .disclaimer{font-size:12px;color:#ffd9d9;background:rgba(255,13,13,0.06);padding:8px;border-radius:8px;border:1px solid rgba(255,13,13,0.06);margin-top:8px}
+  .badge{margin-left:10px;background:rgba(255,99,71,0.08);color:#ffb7a0;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px;border:1px solid rgba(255,99,71,0.06);display:inline-block}
+  p.lead{margin:6px 0 14px;color:var(--muted);font-size:13px}
   form{display:grid;gap:12px;margin-top:6px}
   label{font-size:13px;color:#cfe7ea}
-  input[type="text"], input[type="email"], textarea{
-    width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;font-size:14px;box-sizing:border-box;
-  }
-  textarea{min-height:100px;resize:vertical}
+  input[type="email"], input[type="text"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;font-size:14px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#052022;font-weight:700;cursor:pointer}
-  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-  .panel{margin-top:16px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border:1px solid rgba(255,255,255,0.02)}
+  .buttons{display:flex;gap:10px;margin-top:6px}
+  button.primary{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#022;cursor:pointer;font-weight:700}
+  button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:var(--muted);cursor:pointer}
+  /* Panel for progress + final message */
+  .panel{margin-top:16px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);display:none}
   .progress{height:14px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
-  .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg, #7fffd4, #00c2ff);border-radius:999px;transition:width .4s ease}
+  .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#7fffd4,#00c2ff);border-radius:999px;transition:width .4s ease}
   .status{margin-top:10px;font-size:13px;color:var(--muted)}
-  .final{margin-top:12px;padding:12px;border-radius:8px;background:rgba(14,165,164,0.06);color:#cff8f7;display:none}
-  @media (max-width:640px){.row{grid-template-columns:1fr}}
+  .final{margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,180,216,0.06);color:#cff8f7;display:none}
+  footer{margin-top:12px;font-size:12px;color:var(--muted)}
+  @media(max-width:640px){.row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-  <div class="wrap" role="main" aria-live="polite">
-    <header>
-      <div class="logo">
-        <!-- Put your own non-official logo file named "logo.png" in the same folder as this HTML.
-             DO NOT use the real Fantasy Premier League logo unless you have permission. -->
-        <img src="logo.png" alt="Game logo (your image)">
-      </div>
-      <div>
-        <h1>Refund Request</h1>
-        <p class="lead">This is the official refund page for Fantasy Premier League. All information you provide will be kept secure and won't be shared with any third-party organizations under any circumstances</p>
-        <div class="disclaimer">Note: Kindly ensure that all provided information is accurate to facilitate an expedited process.</div>
-      </div>
-    </header>
-
-    <form id="simForm" autocomplete="off" onsubmit="return false;">
-      <label for="email">Registered email</label>
-      <input id="email" name="email" type="email" placeholder="friend@example.com" required>
-
-      <div class="row">
-        <div>
-          <label for="manager">Manager's name</label>
-          <input id="manager" name="manager" type="text" placeholder="Manager Name (e.g. Alex Smith)" required>
+  <div class="container">
+    <div class="card" role="main" aria-live="polite">
+      <div class="header">
+        <div class="logo-wrap" id="logoWrap">
+          <!-- Put your logo filename or URL in the img src below -->
+          <!-- Example: <img src="fpl-logo.png" alt="Fantasy Premier League"> -->
+          <img id="brandLogo" src="fpl-logo.png" alt="Game Logo">
         </div>
-        <div>
-          <label for="reason">Reason for refund</label>
-          <input id="reason" name="reason" type="text" placeholder="Accidental purchase / Disappointed with game" required>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center">
+            <h1 id="pageTitle">Refund Request</h1>
+            <span class="badge" aria-hidden="true">PRANK — NOT REAL</span>
+          </div>
+          <p class="lead">This is a harmless local prank page. No real refunds or messages are sent — everything runs in your browser.</p>
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:6px;align-items:center">
-        <button class="btn" id="submitBtn">Submit</button>
-        <button class="btn secondary" id="resetBtn" type="button">Reset</button>
-      </div>
-    </form>
+      <form id="prankForm" onsubmit="handleSubmit(event)">
+        <label for="email">Registered email</label>
+        <input id="email" name="email" type="email" placeholder="friend@example.com" required>
 
-    <div class="panel" id="panel" aria-hidden="true" style="display:none">
-      <div class="progress"><i id="bar" style="width:0%"></i></div>
-      <div class="status" id="status">Queued...</div>
-      <div class="final" id="finalBox" role="status"></div>
+        <div class="row">
+          <div>
+            <label for="manager">Manager's name</label>
+            <input id="manager" name="manager" type="text" placeholder="Manager Name" required>
+          </div>
+          <div>
+            <label for="reason">Reason for refund</label>
+            <input id="reason" name="reason" type="text" placeholder="Accidental purchase / Disappointed" required>
+          </div>
+        </div>
+
+        <div class="buttons" aria-hidden="false">
+          <button id="submitBtn" class="primary" type="submit">Submit</button>
+          <button id="resetBtn" class="secondary" type="button">Reset</button>
+        </div>
+      </form>
+
+      <div id="panel" class="panel" aria-hidden="true">
+        <div class="progress"><i id="bar" style="width:0%"></i></div>
+        <div id="status" class="status">Queued...</div>
+        <div id="finalBox" class="final" role="status"></div>
+      </div>
+
+      <footer>Again: this is a prank simulator and collects no data. Don’t impersonate support or use it to harm others.</footer>
     </div>
-
   </div>
 
 <script>
-(function(){
-  const submitBtn = document.getElementById('submitBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const panel = document.getElementById('panel');
-  const bar = document.getElementById('bar');
-  const status = document.getElementById('status');
-  const finalBox = document.getElementById('finalBox');
-  const form = document.getElementById('simForm');
+/* ------------------------
+   CONFIGURATION / CONTENT
+   ------------------------
+   - logo: replace the src of #brandLogo with a local filename (same folder) or a URL.
+   - finalMessages: array of allowed final reveal texts. Edit these to change the final message.
+   IMPORTANT: do NOT remove the visible PRANK badge or impersonate real support pages.
+*/
+const finalMessages = [
+  "Prank complete — no real refund occurred. Gotcha! 😄",
+  "Joke revealed: This was only a simulator. No money changed hands.",
+  "All done — this was a harmless prank. Maybe buy your friend a coffee instead ☕"
+];
 
-  const steps = [
-    {text: 'Validating purchase record...', delay: 900},
-    {text: 'Verifying account details...', delay: 1200},
-    {text: 'C
+// You may change the index for a default message here (0..finalMessages.length-1)
+const defaultFinalIndex = 0;
+
+/* ------------------------
+   END CONFIG
+   ------------------------ */
+
+const form = document.getElementById('prankForm');
+const panel = document.getElementById('panel');
+const bar = document.getElementById('bar');
+const status = document.getElementById('status');
+const finalBox = document.getElementById('finalBox');
+const submitBtn = document.getElementById('submitBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+const steps = [
+  {text: 'Validating purchase record...', delay: 800},
+  {text: 'Verifying account details...', delay: 1100},
+  {text: 'Contacting payment gateway...', delay: 1300},
+  {text: 'Processing refund...', delay: 1000},
+  {text: 'Finalizing transaction...', delay: 900},
+];
+
+function handleSubmit(e){
+  e.preventDefault();
+  // simple HTML5 validation
+  if(!form.reportValidity()) return;
+
+  // show panel and start simulation
+  panel.style.display = 'block';
+  panel.setAttribute('aria-hidden','false');
+  finalBox.style.display = 'none';
+  bar.style.width = '0%';
+  status.textContent = 'Starting...';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Processing...';
+
+  simulateProgress().then(() => {
+    // show final message
+    finalBox.textContent = finalMessages[defaultFinalIndex] || finalMessages[0];
+    finalBox.style.display = 'block';
+    status.textContent = 'Completed';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit';
+  });
+}
+
+function simulateProgress(){
+  return new Promise((resolve) => {
+    let total = 0;
+    let stepIndex = 0;
+    const totalSteps = steps.length;
+
+    function nextStep(){
+      if(stepIndex >= totalSteps){
+        bar.style.width = '100%';
+        setTimeout(resolve, 600);
+        return;
+      }
+      const s = steps[stepIndex];
+      status.textContent = s.text;
+      total += Math.round(100/totalSteps);
+      bar.style.width = Math.min(total, 98) + '%';
+      stepIndex++;
+      setTimeout(nextStep, s.delay + Math.random()*500);
+    }
+    // slight initial delay to look natural
+    setTimeout(nextStep, 300 + Math.random()*300);
+  });
+}
+
+resetBtn.addEventListener('click', function(){
+  form.reset();
+  panel.style.display = 'none';
+  panel.setAttribute('aria-hidden','true');
+  bar.style.width = '0%';
+  finalBox.style.display = 'none';
+});
+
+// Accessibility: allow Enter on inputs to submit
+form.addEventListener('keydown', function(ev){
+  if(ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA'){
+    ev.preventDefault();
+    handleSubmit(new Event('submit'));
+  }
+});
+</script>
+</body>
+</html>
